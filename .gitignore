@@ -1,0 +1,6 @@
+﻿################################################################################
+# This .gitignore file was automatically created by Microsoft(R) Visual Studio.
+################################################################################
+
+/trunk/.vs/CrazyKTV
+/.vs/crazyKTVWebRemote/v17

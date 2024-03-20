@@ -1,10 +1,10 @@
-// jQuery List DragSort v0.5.1
+// jQuery List DragSort v0.5.2
 // Website: http://dragsort.codeplex.com/
 // License: http://dragsort.codeplex.com/license
 
-(function($) {
+(function ($) {
 
-	$.fn.dragsort = function(options) {
+	$.fn.dragsort = function (options) {
 		if (options == "destroy") {
 			$(this.selector).trigger("dragsort-uninit");
 			return;
@@ -14,7 +14,7 @@
 		var lists = [];
 		var list = null, lastPos = null;
 
-		this.each(function(i, cont) {
+		this.each(function (i, cont) {
 
 			//if list container is table, the browser automatically wraps rows in tbody if not specified so change list container to tbody so that children returns rows as user expected
 			if ($(cont).is("table") && $(cont).children().size() == 1 && $(cont).children().is("tbody"))
@@ -29,7 +29,7 @@
 				scroll: null,
 				container: cont,
 
-				init: function() {
+				init: function () {
 					//set options to default values if not set
 					opts.tagName = $(this.container).children().size() == 0 ? "li" : $(this.container).children().get(0).tagName.toLowerCase();
 					if (opts.itemSelector == "")
@@ -44,24 +44,24 @@
 					this.styleDragHandlers(true);
 				},
 
-				uninit: function() {
+				uninit: function () {
 					var list = lists[$(this).attr("data-listidx")];
 					$(list.container).unbind("mousedown", list.grabItem).unbind("dragsort-uninit");
 					list.styleDragHandlers(false);
 				},
 
-				getItems: function() {
+				getItems: function () {
 					return $(this.container).children(opts.itemSelector);
 				},
 
-				styleDragHandlers: function(cursor) {
-					this.getItems().map(function() { return $(this).is(opts.dragSelector) ? this : $(this).find(opts.dragSelector).get(); }).css("cursor", cursor ? "pointer" : "");
+				styleDragHandlers: function (cursor) {
+					this.getItems().map(function () { return $(this).is(opts.dragSelector) ? this : $(this).find(opts.dragSelector).get(); }).css("cursor", cursor ? "pointer" : "");
 				},
 
-				grabItem: function(e) {
+				grabItem: function (e) {
 					var list = lists[$(this).attr("data-listidx")];
 					var item = $(e.target).closest("[data-listidx] > " + opts.tagName).get(0);
-					var insideMoveableItem = list.getItems().filter(function() { return this == item; }).size() > 0;
+					var insideMoveableItem = list.getItems().filter(function () { return this == item; }).size() > 0;
 
 					//if not left click or if clicked on excluded element (e.g. text box) or not a moveable list item return
 					if (e.which != 1 || $(e.target).is(opts.dragSelectorExclude) || $(e.target).closest(opts.dragSelectorExclude).size() > 0 || !insideMoveableItem)
@@ -82,14 +82,14 @@
 
 					//on mousedown wait for movement of mouse before triggering dragsort script (dragStart) to allow clicking of hyperlinks to work
 					var listElem = this;
-					var trigger = function() {
+					var trigger = function () {
 						list.dragStart.call(listElem, e);
 						$(list.container).unbind("mousemove", trigger);
 					};
-					$(list.container).mousemove(trigger).mouseup(function() { $(list.container).unbind("mousemove", trigger); $(dragHandle).css("cursor", $(dragHandle).attr("data-cursor")); });
+					$(list.container).mousemove(trigger).mouseup(function () { $(list.container).unbind("mousemove", trigger); $(dragHandle).css("cursor", $(dragHandle).attr("data-cursor")); });
 				},
 
-				dragStart: function(e) {
+				dragStart: function (e) {
 					if (list != null && list.draggedItem != null)
 						list.dropItem();
 
@@ -118,10 +118,10 @@
 					var h = list.draggedItem.height();
 					var w = list.draggedItem.width();
 					if (opts.tagName == "tr") {
-						list.draggedItem.children().each(function() { $(this).width($(this).width()); });
+						list.draggedItem.children().each(function () { $(this).width($(this).width()); });
 						list.placeHolderItem = list.draggedItem.clone().attr("data-placeholder", true);
 						list.draggedItem.after(list.placeHolderItem);
-						list.placeHolderItem.children().each(function() { $(this).css({ borderWidth:0, width: $(this).width() + 1, height: $(this).height() + 1 }).html("&nbsp;"); });
+						list.placeHolderItem.children().each(function () { $(this).css({ borderWidth: 0, width: $(this).width() + 1, height: $(this).height() + 1 }).html("&nbsp;"); });
 					} else {
 						list.draggedItem.after(opts.placeHolderTemplate);
 						list.placeHolderItem = list.draggedItem.next().css({ height: h, width: w }).attr("data-placeholder", true);
@@ -139,7 +139,7 @@
 
 					//auto-scroll setup
 					list.scroll = { moveX: 0, moveY: 0, maxX: $(document).width() - $(window).width(), maxY: $(document).height() - $(window).height() };
-					list.scroll.scrollY = window.setInterval(function() {
+					list.scroll.scrollY = window.setInterval(function () {
 						if (opts.scrollContainer != window) {
 							$(opts.scrollContainer).scrollTop($(opts.scrollContainer).scrollTop() + list.scroll.moveY);
 							return;
@@ -150,7 +150,7 @@
 							list.draggedItem.css("top", list.draggedItem.offset().top + list.scroll.moveY + 1);
 						}
 					}, 10);
-					list.scroll.scrollX = window.setInterval(function() {
+					list.scroll.scrollX = window.setInterval(function () {
 						if (opts.scrollContainer != window) {
 							$(opts.scrollContainer).scrollLeft($(opts.scrollContainer).scrollLeft() + list.scroll.moveX);
 							return;
@@ -163,16 +163,16 @@
 					}, 10);
 
 					//misc
-					$(lists).each(function(i, l) { l.createDropTargets(); l.buildPositionTable(); });
+					$(lists).each(function (i, l) { l.createDropTargets(); l.buildPositionTable(); });
 					list.setPos(e.pageX, e.pageY);
 					$(document).bind("mousemove", list.swapItems);
 					$(document).bind("mouseup", list.dropItem);
 					if (opts.scrollContainer != window)
-						$(window).bind("DOMMouseScroll mousewheel", list.wheel);
+						$(window).bind("wheel", list.wheel);
 				},
 
 				//set position of draggedItem
-				setPos: function(x, y) { 
+				setPos: function (x, y) {
 					//remove mouse offset so mouse cursor remains in same place on draggedItem instead of top left corner
 					var top = y - this.offset.top;
 					var left = x - this.offset.left;
@@ -202,7 +202,7 @@
 						y = Math.max(0, y - cont.height() - offset.top) + Math.min(0, y - offset.top);
 						x = Math.max(0, x - cont.width() - offset.left) + Math.min(0, x - offset.left);
 					}
-					
+
 					list.scroll.moveX = x == 0 ? 0 : x * opts.scrollSpeed / Math.abs(x);
 					list.scroll.moveY = y == 0 ? 0 : y * opts.scrollSpeed / Math.abs(y);
 
@@ -211,22 +211,23 @@
 				},
 
 				//if scroll container is a div allow mouse wheel to scroll div instead of window when mouse is hovering over
-				wheel: function(e) {
-					if (($.browser.safari || $.browser.mozilla) && list && opts.scrollContainer != window) {
+				wheel: function (e) {
+					if (list && opts.scrollContainer != window) {
 						var cont = $(opts.scrollContainer);
 						var offset = cont.offset();
-						if (e.pageX > offset.left && e.pageX < offset.left + cont.width() && e.pageY > offset.top && e.pageY < offset.top + cont.height()) {
-							var delta = e.detail ? e.detail * 5 : e.wheelDelta / -2;
-							cont.scrollTop(cont.scrollTop() + delta);
+						e = e.originalEvent;
+						if (e.clientX > offset.left && e.clientX < offset.left + cont.width() && e.clientY > offset.top && e.clientY < offset.top + cont.height()) {
+							var deltaY = (e.deltaMode == 0 ? 1 : 10) * e.deltaY;
+							cont.scrollTop(cont.scrollTop() + deltaY);
 							e.preventDefault();
 						}
 					}
 				},
 
 				//build a table recording all the positions of the moveable list items
-				buildPositionTable: function() {
+				buildPositionTable: function () {
 					var pos = [];
-					this.getItems().not([list.draggedItem[0], list.placeHolderItem[0]]).each(function(i) {
+					this.getItems().not([list.draggedItem[0], list.placeHolderItem[0]]).each(function (i) {
 						var loc = $(this).offset();
 						loc.right = loc.left + $(this).outerWidth();
 						loc.bottom = loc.top + $(this).outerHeight();
@@ -236,7 +237,7 @@
 					this.pos = pos;
 				},
 
-				dropItem: function() {
+				dropItem: function () {
 					if (list.draggedItem == null)
 						return;
 
@@ -276,12 +277,12 @@
 					$(document).unbind("mousemove", list.swapItems);
 					$(document).unbind("mouseup", list.dropItem);
 					if (opts.scrollContainer != window)
-						$(window).unbind("DOMMouseScroll mousewheel", list.wheel);
+						$(window).unbind("wheel", list.wheel);
 					return false;
 				},
 
 				//swap the draggedItem (represented visually by placeholder) with the list item the it has been dragged on top of
-				swapItems: function(e) {
+				swapItems: function (e) {
 					if (list.draggedItem == null)
 						return false;
 
@@ -301,8 +302,8 @@
 						return false;
 
 					//save fixed items locations
-					var children = function() { return $(nlist.container).children().not(nlist.draggedItem); };
-					var fixed = children().not(opts.itemSelector).each(function(i) { this.idx = children().index(this); });
+					var children = function () { return $(nlist.container).children().not(nlist.draggedItem); };
+					var fixed = children().not(opts.itemSelector).each(function (i) { this.idx = children().index(this); });
 
 					//if moving draggedItem up or left place placeHolder before list item the dragged item is hovering over otherwise place it after
 					if (lastPos == null || lastPos.top > list.draggedItem.offset().top || lastPos.left > list.draggedItem.offset().left)
@@ -311,7 +312,7 @@
 						$(nlist.pos[ei].elm).after(list.placeHolderItem);
 
 					//restore fixed items location
-					fixed.each(function() {
+					fixed.each(function () {
 						var elm = children().eq(this.idx).get(0);
 						if (this != elm && children().index(this) < this.idx)
 							$(this).insertAfter(elm);
@@ -320,13 +321,13 @@
 					});
 
 					//misc
-					$(lists).each(function(i, l) { l.createDropTargets(); l.buildPositionTable(); });
+					$(lists).each(function (i, l) { l.createDropTargets(); l.buildPositionTable(); });
 					lastPos = list.draggedItem.offset();
 					return false;
 				},
 
 				//returns the index of the list item the mouse is over
-				findPos: function(x, y) {
+				findPos: function (x, y) {
 					for (var i = 0; i < this.pos.length; i++) {
 						if (this.pos[i].left < x && this.pos[i].right > x && this.pos[i].top < y && this.pos[i].bottom > y)
 							return i;
@@ -335,11 +336,11 @@
 				},
 
 				//create drop targets which are placeholders at the end of other lists to allow dragging straight to the last position
-				createDropTargets: function() {
+				createDropTargets: function () {
 					if (!opts.dragBetween)
 						return;
 
-					$(lists).each(function() {
+					$(lists).each(function () {
 						var ph = $(this.container).find("[data-placeholder]");
 						var dt = $(this.container).find("[data-droptarget]");
 						if (ph.size() > 0 && dt.size() > 0)
@@ -350,7 +351,7 @@
 							else
 								//list.placeHolderItem.clone().removeAttr("data-placeholder") crashes in IE7 and jquery 1.5.1 (doesn't in jquery 1.4.2 or IE8)
 								$(this.container).append(list.placeHolderItem.removeAttr("data-placeholder").clone().attr("data-droptarget", true));
-							
+
 							list.placeHolderItem.attr("data-placeholder", true);
 						}
 					});
@@ -368,7 +369,7 @@
 		itemSelector: "",
 		dragSelector: "",
 		dragSelectorExclude: "input, textarea",
-		dragEnd: function() { },
+		dragEnd: function () { },
 		dragBetween: false,
 		placeHolderTemplate: "",
 		scrollContainer: window,

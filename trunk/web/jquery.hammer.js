@@ -1,26 +1,33 @@
-/*
- * Hammer.JS jQuery plugin
- * version 0.3
- * author: Eight Media
- * https://github.com/EightMedia/hammer.js
- */
-jQuery.fn.hammer = function(options)
-{
-    return this.each(function()
-    {
-        var hammer = new Hammer(this, options);
-
-        var $el = jQuery(this);
-        $el.data("hammer", hammer);
-
-        var events = ['hold','tap','doubletap','transformstart','transform','transformend','dragstart','drag','dragend','swipe','release'];
-
-        for(var e=0; e<events.length; e++) {
-            hammer['on'+ events[e]] = (function(el, eventName) {
-                return function(ev) {
-                    el.trigger(jQuery.Event(eventName, ev));
-                };
-            })($el, events[e]);
+(function (factory) {
+    if (typeof define === 'function' && define.amd) {
+        define(['jquery', 'hammerjs'], factory);
+    } else if (typeof exports === 'object') {
+        factory(require('jquery'), require('hammerjs'));
+    } else {
+        factory(jQuery, Hammer);
+    }
+}(function ($, Hammer) {
+    function hammerify(el, options) {
+        var $el = $(el);
+        if (!$el.data("hammer")) {
+            $el.data("hammer", new Hammer($el[0], options));
         }
-    });
-};
+    }
+
+    $.fn.hammer = function (options) {
+        return this.each(function () {
+            hammerify(this, options);
+        });
+    };
+
+    // extend the emit method to also trigger jQuery events
+    Hammer.Manager.prototype.emit = (function (originalEmit) {
+        return function (type, data) {
+            originalEmit.call(this, type, data);
+            $(this.element).trigger({
+                type: type,
+                gesture: data
+            });
+        };
+    })(Hammer.Manager.prototype.emit);
+}));
